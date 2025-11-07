@@ -1,7 +1,6 @@
 #
 # Developed by Remon Verbraak
 # Date: 7-11-2025
-# Remonverbraak8@gmail.com 
 #   
 # Description:
 # This code makes a double pendulum using pymunk and pygame and classes  
