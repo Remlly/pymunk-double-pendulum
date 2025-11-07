@@ -107,7 +107,7 @@ class childCircle(PhysicsBody):
 
 #%%Initialization of physiscs objects
 segment1 = childSegment(center,100,0,10,5)
-segment2 = childSegment((cx+100,cy),100,0,10,5)
+segment2 = childSegment((cx+100,cy),100,0,10,15)
 center_joint = childCircle(center,10,10,pymunk.Body.STATIC)
 
 #%%Initialization of joints
