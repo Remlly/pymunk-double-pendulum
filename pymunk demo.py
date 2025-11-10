@@ -104,17 +104,27 @@ class childCircle(PhysicsBody):
         centerx,centery = to_pygame(self.body.position)
         pygame.draw.circle(screen, (0,0,0),(centerx,centery),self.radius)
 
-class childPinJoint(PhysicsBody):
-    def __init__(self, body_a, body_b, a, b):
-        "Even if a joint does not have an actual shape or body, we do want it too inherit functions we can then use for morphology"
-        self.body = pymunk.PinJoint (body_a.body, body_b.body,a,b) #here we overwrite the body with a joint.
+class Joint(PhysicsBody):
+    def __init__(self, joint: pymunk.constraints, *args):
+        "By passing the type of constraint and the appropiate number of arguments, we can initiate any constraint within pymunk.constraints"
+        "We still have to check for joint type and unpack accordingly :("
+        if joint == pymunk.PinJoint:
+            #unpack the first 4 variables for a pinjoint. body_a, body_b shape.a, shape.b
+            body_a, body_b, shape_a, shape_b = args
+            self.body = joint (body_a.body,body_b.body,shape_a,shape_b)
+        elif joint == pymunk.SimpleMotor:
+            #we have to only unpack the first 3 variables for a pinjoint
+            body_a, body_b, speed = args
+            self.body = pymunk.SimpleMotor(body_a.body,body_b.body, speed)
+            pass
         
     def add_to_space(self, space):
-        space.add(self.body) #We redefine the inherited function so its applicable too a joint.
+        space.add(self.body) #We redefine the inherited function so its applicable to a joint.
 
     def draw_body(self):
         #we cant draw the body because pinjoints dont keep track of their position
-        #To make this work, we either to draw on position A, or B
+        #To make this work, we either have to draw on position A, or B, or an interpolated
+        #position 
         pass
 
 #%%Initialization of physiscs objects
@@ -123,14 +133,14 @@ segment2 = childSegment((cx+100,cy),100,0,10,10)
 center_joint = childCircle(center,10,10,pymunk.Body.STATIC)
 
 #%%Initialization of joints
-#joint1 = pymunk.PinJoint(center_joint.body, segment1.body,(0,0),(segment1.shape.a))
-#joint2 = pymunk.PinJoint(segment1.body,segment2.body,segment1.shape.b,segment2.shape.a)
+joint1 = Joint(pymunk.PinJoint, center_joint,segment1,(0,0), segment1.shape.a)
+joint2 = Joint(pymunk.PinJoint, segment1, segment2, segment1.shape.b,segment2.shape.a)
+motor = Joint(pymunk.SimpleMotor, center_joint, segment1, 1)
 
-joint1 = childPinJoint(center_joint,segment1,(0,0), segment1.shape.a)
-joint2 = childPinJoint(segment1, segment2, segment1.shape.b,segment2.shape.a)
+
 
 #%%adding physics objects to physics space
-bodies = [segment1,segment2,center_joint,joint1,joint2]
+bodies = [segment1,segment2,center_joint,joint1,joint2,motor]
 for x in bodies:
     x.add_to_space(space) #visual studio code no longer recognizes the inherited function :)
                             #because all bodies inherit the add to space function, we can do this.
