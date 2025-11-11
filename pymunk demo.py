@@ -52,6 +52,7 @@ fps = 50
 segment1 = Segment(center, 100,0,10,10)
 segment1.add_segment(100,90,5,10,(25,0))
 segment2 = Segment((cx+100,cy),100,0,10,10)
+segment2.add_segment(100,90,5,10,(25,0))
 center_joint = Circle(center,10,10,pymunk.Body.STATIC)
 
 #%%Initialization of joints
