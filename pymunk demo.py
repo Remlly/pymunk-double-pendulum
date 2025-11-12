@@ -51,9 +51,9 @@ fps = 50
 
 
 floor = Segment((0,500),screenx,0,10,10,pymunk.Body.KINEMATIC) #kinematic objects can have collision but wont move by collision
-test = Segment((600,490),100,0,10,7,pymunk.Body.KINEMATIC)
+test = Segment((500,490),100,-15,10,7,pymunk.Body.KINEMATIC)
 floor.shapes[0].friction = 0.9
-test.shapes[0].friction = 0.5
+test.shapes[0].friction = 0.9
 rvr = rocker_bogie()
 
 test_mount = Circle((300,300),10,10,pymunk.Body.STATIC)
@@ -81,9 +81,9 @@ add_objects(space)
 #%% Game loop
 def main():
     running = True
-
+    change_rate = pymunk.Vec2d(0,0)
     while running:
-        TranslateVector = pymunk.Vec2d(0,0)
+        TranslateVector = pymunk.Vec2d(-change_rate[0],-change_rate[1])
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -99,23 +99,28 @@ def main():
                     TranslateVector = (0,-10)
                 if event.key == pygame.K_s:
                     TranslateVector = (0,10)
-                print(TranslateVector)
-                for obj in DrawedObjects:
-                    obj.translate_body(TranslateVector)
-                    
         
+        print(TranslateVector)
+        for obj in DrawedObjects:
+            obj.translate_body(TranslateVector)
+                    
+        #To keep the bogie in the middle of the screen, (mimick a moving camera) We
+        #need to get the rate at which the position of the bogie changes. 
+        #prev position - current position
+
+
 
         screen.fill((255,255,255))
         draw_to_screen(screen)
-        
-        #shapes inherit the draw_body function.
-        #center_joint.draw_body(screen)
-        #segment1.draw_body(screen)
-        #segment2.draw_body(screen)
-        #pendulum1.draw_bodies(sc=screen)
         pygame.display.update()
         clock.tick(fps)
+
+
+        current_pos = rvr.bogie.structure.body.position
         space.step(1/fps)
+        next_pos = rvr.bogie.structure.body.position
+        change_rate = next_pos - current_pos
+        print(change_rate[0])
 
 if __name__ == "__main__":
     main()
