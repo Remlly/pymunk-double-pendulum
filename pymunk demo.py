@@ -25,6 +25,7 @@ import pygame
 import pymunk
 from PhysicsObject import *
 from DoublePendulum import *
+from RockerBogie import *
 
 #%%initialize
 # Initialize Pygame
@@ -48,34 +49,33 @@ space.gravity = 0,981      # Set its gravity
 fps = 50
 
 
-#%%Initialization of physiscs objects
-segment1 = Segment(center, 100,0,10,10)
-segment1.add_segment(100,90,5,10,(25,0))
-segment2 = Segment((cx+100,cy),100,0,10,10)
-segment2.add_segment(100,90,5,10,(25,0))
-center_joint = Circle(center,10,10,pymunk.Body.STATIC)
 
-#%%adding objects the drawing list.
-DrawedObjects.append(segment1)
-DrawedObjects.append(segment2)
-DrawedObjects.append(center_joint)
+floor = Segment((0,500),screenx,0,10,10,pymunk.Body.KINEMATIC) #kinematic objects can have collision but wont move by collision
+test = Segment((600,490),100,0,10,7,pymunk.Body.KINEMATIC)
+floor.shapes[0].friction = 0.9
+test.shapes[0].friction = 0.5
+rvr = rocker_bogie()
 
-#%%Initialization of joints
-joint1 = Joint(pymunk.PinJoint, center_joint,segment1,(0,0), segment1.shapes[0].a)
-joint1.body.distance = 0 #this is because pymunk automatically calculates joint distance, and we dont place the segments correctly.
-joint2 = Joint(pymunk.PinJoint, segment1, segment2, segment1.shapes[0].b,segment2.shapes[0].a)
-joint2.body.distance = 0
+test_mount = Circle((300,300),10,10,pymunk.Body.STATIC)
+mount_joint = pymunk.PinJoint(rvr.bogie.structure.body,test_mount.body,(0,0),(0,0))
+mount_joint.distance = 0
+#physicsObjects.append(mount_joint)
 
-pendulum1 = double_pendulum((500,400))
+#%%all objects that need to be drawn 
+DrawedObjects.append(rvr.bogie.structure)
+DrawedObjects.append(rvr.rocker.structure)
+DrawedObjects.append(rvr.bogie.wheel1)
+DrawedObjects.append(rvr.bogie.wheel2)
+DrawedObjects.append(rvr.rocker.wheel)
 
-#%%Disable collision between segments
-segment_group = 0b100   #segments are group 1 (ob1)
-segment_mask = 0b000    #Segments dont collide with group 1 (ob0) 
-segment1.shapes[0].filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
-segment2.shapes[0].filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
-center_joint.shape.filter = pymunk.ShapeFilter(group=segment_group, mask = segment_mask)
-#%%adding physics objects to physics space
-add_objects(space)
+DrawedObjects.append(floor)
+DrawedObjects.append(test)
+
+
+
+#%%Adding the physics object list to the physics space
+#magic function :spooky: This function adds all segment bodies and shapes to the physics space. I have abstracted it.
+add_objects(space) 
 
 
 #%% Game loop
@@ -109,9 +109,9 @@ def main():
         draw_to_screen(screen)
         
         #shapes inherit the draw_body function.
-        center_joint.draw_body(screen)
-        segment1.draw_body(screen)
-        segment2.draw_body(screen)
+        #center_joint.draw_body(screen)
+        #segment1.draw_body(screen)
+        #segment2.draw_body(screen)
         #pendulum1.draw_bodies(sc=screen)
         pygame.display.update()
         clock.tick(fps)

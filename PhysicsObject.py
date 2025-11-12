@@ -35,7 +35,7 @@ class PhysicsBody:
         "This function will draw the body in green"
         x,y = to_pygame(self.body.position)
         pygame.draw.circle(screen, (0,255,0),(x,y),self.radius)
-
+    
     def translate_body(self, xy):
         prev = self.body.position
         self.body.position += xy
@@ -69,8 +69,8 @@ class Segment(PhysicsBody):
         radius      = radius    : Int
         local       = coord     : Tuple"""
         
-        p1 = pymunk.Vec2d(-l/2,0).rotated_degrees(angle) + local
-        p2 = pymunk.Vec2d(l/2,0).rotated_degrees(angle) + local
+        p1 = pymunk.Vec2d(0,0).rotated_degrees(angle) + local 
+        p2 = pymunk.Vec2d(l,0).rotated_degrees(angle) + local
         self.radius = radius
         self.shape = pymunk.Segment(self.body, p1, p2, self.radius)  #adds to the body the defined segment
         self.shape.mass = mass
