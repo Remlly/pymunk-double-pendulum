@@ -9,7 +9,8 @@ class bogie():
         self.segmentScale = 1
         self.SegmentSize = 50 * self.segmentScale
         self.wheelfriction = 0.5
-        
+        self.motor_rate = 0
+
         #Here we are creating the bogie structure.
         self.structure = Segment((300,450),self.SegmentSize,225,10,10)
         self.structure.add_segment(self.SegmentSize,-225,10,10,self.structure.shapes[0].b)
@@ -22,7 +23,7 @@ class bogie():
         #creation of the first wheel, with motor.
         self.wheel1 = Circle(self.wheel1Point,10,self.wheelSize)
         self.wheel1_joint = pymunk.PinJoint(self.structure.body,self.wheel1.body,self.structure.shapes[0].a,(0,0))
-        self.wheel1_motor = pymunk.SimpleMotor(self.wheel1.body,self.structure.body,100)
+        self.wheel1_motor = pymunk.SimpleMotor(self.wheel1.body,self.structure.body,self.motor_rate)
         self.wheel1.shape.friction = self.wheelfriction
 
         #creation of the second wheel, without motor
@@ -56,6 +57,7 @@ class rocker():
         self.segmentScale = 1
         self.SegmentSize = 100 * self.segmentScale
         self.wheelfriction = 0.5
+        self.motor_rate = 0
 
         #creating the structure
         self.structure = Segment(xy,self.SegmentSize,0,10,10) #the rocker should be created at bogie shapes[0].b (middle of the triangle)
@@ -65,7 +67,7 @@ class rocker():
         self.wheelPoint = self.structure.body.local_to_world(self.structure.shapes[1].b)
         self.wheel = Circle(self.wheelPoint,10,self.wheelSize)
         self.wheel_joint = pymunk.PinJoint(self.structure.body,self.wheel.body,self.structure.shapes[1].b,(0,0))
-        self.wheel1_motor = pymunk.SimpleMotor(self.wheel.body,self.structure.body,100)
+        self.wheel1_motor = pymunk.SimpleMotor(self.wheel.body,self.structure.body,self.motor_rate)
         #appending joints
         physicsObjects.append(self.wheel_joint)
         physicsObjects.append(self.wheel1_motor)
@@ -94,4 +96,26 @@ class rocker_bogie():
         self.bogie.structure.shapes[1].filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
         self.rocker.structure.shapes[0].filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
 
-    
+        self.max_rate = 100
+        self.current_rate = 0
+
+    def get_input(self, event):
+            print(self.current_rate)
+            if event.key == pygame.K_LEFT:
+               #going left
+                if not self.current_rate < -self.max_rate:
+                    #if current is not smaller than max_rate #negative
+                    self.current_rate -= 10
+                else: 
+                    self.current_rate = - self.max_rate
+            if event.key == pygame.K_RIGHT:
+                #going right
+                if not self.current_rate > self.max_rate:
+                    #if current speed is not bigger than max rate
+                    self.current_rate += 10
+                else:
+                    self.current_rate = self.max_rate
+            #self.update()
+    def update(self):
+        self.rocker.wheel1_motor.rate = self.current_rate
+        self.bogie.wheel1_motor.rate = self.current_rate

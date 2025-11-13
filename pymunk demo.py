@@ -86,6 +86,7 @@ add_objects(space)
 def main():
     var=True
     running = True
+    score = 0
     change_rate = pymunk.Vec2d(0,0)
     while running:
         TranslateVector = pymunk.Vec2d(-change_rate[0],-change_rate[1])
@@ -95,6 +96,7 @@ def main():
                 # Quit Pygame
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
+                rvr.get_input(event)
                 print('A key has been pressed')
                 if event.key == pygame.K_a:
                     TranslateVector = (-10,0)
@@ -104,8 +106,7 @@ def main():
                     TranslateVector = (0,-10)
                 if event.key == pygame.K_s:
                     TranslateVector = (0,10)
-        
-        print(TranslateVector)
+        rvr.update()
         for obj in DrawedObjects:
             obj.translate_body(TranslateVector)
                     
@@ -113,9 +114,10 @@ def main():
         #als floor[1].body gets past 2/3 of screenx, create a new floor
         #if floor[0].body.local_to_world(shape.b) gets -10 its off the screen, delete it.
 
-        if floor_list[-1].body.position[-1] < (screenx * 0.66) and var:
+        if floor_list[-1].body.position[0] < (screenx * 0.66) and var:
             create_new_floor(floor_list[-1])
-
+            score += 1
+            print(f'Segments generated(score):{score}' )
             add_objects(space) 
 
         screen.fill((255,255,255))
