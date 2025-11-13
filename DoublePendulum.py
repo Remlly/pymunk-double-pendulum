@@ -14,7 +14,7 @@ class double_pendulum():
 
 
 
-        #%%Joining the togheter
+        #%%Joining the segments togheter
         joint1 = Joint(pymunk.PinJoint, self.center_joint,self.segment1,(0,0), self.segment1.shapes[0].a)
         joint1.body.distance = 0 #this is because pymunk automatically calculates joint distance, and we dont place the segments correctly.
         joint2 = Joint(pymunk.PinJoint, self.segment1, self.segment2, self.segment1.shapes[0].b,self.segment2.shapes[0].a)

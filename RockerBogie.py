@@ -22,7 +22,7 @@ class bogie():
         #creation of the first wheel, with motor.
         self.wheel1 = Circle(self.wheel1Point,10,self.wheelSize)
         self.wheel1_joint = pymunk.PinJoint(self.structure.body,self.wheel1.body,self.structure.shapes[0].a,(0,0))
-        self.wheel1_motor = pymunk.SimpleMotor(self.wheel1.body,self.structure.body,200)
+        self.wheel1_motor = pymunk.SimpleMotor(self.wheel1.body,self.structure.body,100)
         self.wheel1.shape.friction = self.wheelfriction
 
         #creation of the second wheel, without motor
@@ -34,6 +34,10 @@ class bogie():
         physicsObjects.append(self.wheel1_joint)
         physicsObjects.append(self.wheel2_joint)
         physicsObjects.append(self.wheel1_motor)
+
+        #appending shapes to the draw list
+        self.shapes = [self.structure,self.wheel1,self.wheel2]
+        DrawedObjects.extend(self.shapes)
 
         #disable collision
         #:spooky: something about bitshifting.
@@ -61,10 +65,15 @@ class rocker():
         self.wheelPoint = self.structure.body.local_to_world(self.structure.shapes[1].b)
         self.wheel = Circle(self.wheelPoint,10,self.wheelSize)
         self.wheel_joint = pymunk.PinJoint(self.structure.body,self.wheel.body,self.structure.shapes[1].b,(0,0))
-        self.wheel1_motor = pymunk.SimpleMotor(self.wheel.body,self.structure.body,200)
+        self.wheel1_motor = pymunk.SimpleMotor(self.wheel.body,self.structure.body,100)
         #appending joints
         physicsObjects.append(self.wheel_joint)
         physicsObjects.append(self.wheel1_motor)
+
+        #adding shapes to the drawing list.
+        self.shapes = [self.structure,self.wheel]
+        DrawedObjects.extend(self.shapes)
+
         #disabling collision :spooky:
         segment_group = 0b010
         segment_mask = 0b010
@@ -84,4 +93,5 @@ class rocker_bogie():
         segment_mask = 0b010
         self.bogie.structure.shapes[1].filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
         self.rocker.structure.shapes[0].filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
+
     
