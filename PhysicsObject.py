@@ -17,7 +17,7 @@ def draw_to_screen(screen):
     "Only PhysicsObject classes should be in DrawedObjects. This function will then draw them to the screen"
     for Obj in Object_list:
         Obj.draw_shape(screen)
-
+        Obj.draw_image(screen)
 def draw_body_screen(screen):
     for Obj in Object_list:
         Obj.draw_body(screen)
@@ -49,6 +49,12 @@ class PhysicsBody:
         usefull for mimicking a camera."""
         self.body.position += xy
 
+    def attach_image(self, image_path):
+        """This function attaches a pygame image to the body"""
+        self.image = pygame.image.load(image_path).convert_alpha()
+
+    def draw_image(self,screen):
+        pass 
         
 #%%child objects inherit from PhysicsBody
 class Segment(PhysicsBody):
@@ -82,9 +88,9 @@ class Segment(PhysicsBody):
         self.radius = radius
         self.shape = pymunk.Segment(self.body, p1, p2, self.radius)  #adds to the body the defined segment
         self.shape.mass = mass
-        self.shape.friction = 0.9
+        self.shape.friction = 0.3
         #self.shapes.append(self.shape)                               #adds to defined segment to the list of shapes.
-        physicsObjects.append(self.shape)
+        physicsObjects.append(self.shape)                             #Shape needs to be added to the physics list to calculate moment of inertia and cog
       
 
     def draw_shape(self, screen):
@@ -114,7 +120,11 @@ class Circle(PhysicsBody):
         centerx,centery = to_pygame(self.body.position)
         pygame.draw.circle(screen, (0,0,0),(centerx,centery),self.radius)
 
-
+    def draw_image(self,screen):
+        """rotates the original image by the body angle,  then draws it at body location"""
+        rotated_image = pygame.transform.rotate(self.image,-self.body.angle)
+        blit_at = self.body.position - (rotated_image.get_width()/2, rotated_image.get_height()/2)
+        screen.blit(rotated_image,blit_at)
 
 #This code is only used for the pendulum. new joints can be made straight from pymunk. but
 #have to appended to the body list manually.

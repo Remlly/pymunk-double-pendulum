@@ -43,6 +43,7 @@ screen.fill((255,255,255))
 pygame.display.flip()
 pygame.display.set_caption("Hello Pygame")
 
+wheel = pygame.image.load('wheel.png.png').convert_alpha()
 
 clock = pygame.time.Clock()
 space = pymunk.Space()     # Create a Space which contain the simulation
@@ -54,6 +55,9 @@ floor = Segment((0,500),screenx,0,10,10,pymunk.Body.KINEMATIC) #kinematic object
 #floor.shapes[0].friction = 0.9
 #test.shapes[0].friction = 0.9
 rvr = rocker_bogie()
+rvr.bogie.wheel1.attach_image('wheel.png.png')
+rvr.bogie.wheel2.attach_image('wheel.png.png')
+rvr.rocker.wheel.attach_image('wheel.png.png')
 
 #%%all objects that need to be drawn
 #DrawedObjects.append(floor)
@@ -81,10 +85,11 @@ add_objects(space)
 print(Object_list)
 
 
+
 #%% Game loop
 def main():
     var=True
-    cam = False
+    cam = True
     running = True
     score = 0
     change_rate = pymunk.Vec2d(0,0)
@@ -124,7 +129,9 @@ def main():
             add_objects(space) 
 
         screen.fill((255,255,255))
+        screen.blit(wheel,center)
         draw_to_screen(screen)
+        
         #draw_body_screen(screen)
         pygame.display.update()
         clock.tick(fps)
@@ -135,7 +142,7 @@ def main():
         next_pos = rvr.bogie.structure.body.position
         change_rate = next_pos - current_pos
 
-        print(change_rate)
+        #print(change_rate)
 
 if __name__ == "__main__":
     main()

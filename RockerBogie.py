@@ -10,7 +10,7 @@ class bogie():
         self.wheelSize = 15
         self.segmentScale = 1
         self.SegmentSize = 50 * self.segmentScale
-        self.wheelfriction = 0.5
+        self.wheelfriction = 0.3
         self.motor_rate = 0
 
         #Here we are creating the bogie structure.
@@ -29,6 +29,7 @@ class bogie():
 
         #creation of the first wheel, with motor.
         self.wheel1 = Circle(self.wheel1Point,10,self.wheelSize)
+
         self.wheel1_joint = pymunk.PinJoint(self.structure.body,self.wheel1.body,shape_list[0].a,(0,0))
         self.wheel1_motor = pymunk.SimpleMotor(self.wheel1.body,self.structure.body,self.motor_rate)
         self.wheel1.shape.friction = self.wheelfriction
@@ -59,7 +60,7 @@ class rocker():
         self.wheelSize = 15
         self.segmentScale = 1
         self.SegmentSize = 100 * self.segmentScale
-        self.wheelfriction = 0.5
+        self.wheelfriction = 0.3
         self.motor_rate = 0
 
         #creating the structure
@@ -108,7 +109,7 @@ class rocker_bogie():
         bogie_shapes[1].filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
         rocker_shapes[0].filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
 
-        self.max_rate = 100
+        self.max_rate = 500
         self.current_rate = 0
 
     def get_input(self, event):
