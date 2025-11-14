@@ -2,7 +2,7 @@ import pygame
 import pymunk
 
 physicsObjects = []
-DrawedObjects = []
+Object_list = []
 
 
 def add_objects(space):
@@ -15,11 +15,11 @@ def add_objects(space):
 
 def draw_to_screen(screen):
     "Only PhysicsObject classes should be in DrawedObjects. This function will then draw them to the screen"
-    for Obj in DrawedObjects:
+    for Obj in Object_list:
         Obj.draw_shape(screen)
 
 def draw_body_screen(screen):
-    for Obj in DrawedObjects:
+    for Obj in Object_list:
         Obj.draw_body(screen)
 
 def to_pygame(p):
@@ -37,6 +37,7 @@ class PhysicsBody:
         self.shape = None
         self.radius = radius
         physicsObjects.append(self.body)
+        Object_list.append(self)
 
     def draw_body(self,screen):
         "This function will draw the body in green"
@@ -63,7 +64,7 @@ class Segment(PhysicsBody):
         body_type   = pymunk.Body """
         
         super().__init__(xy,radius,body_type)
-        self.shapes = []
+        #self.shapes = []
         self.add_segment(l,angle,mass,radius)
         
     def add_segment(self, l : int, angle : int, mass : int, radius, local = (0,0)):
@@ -82,12 +83,14 @@ class Segment(PhysicsBody):
         self.shape = pymunk.Segment(self.body, p1, p2, self.radius)  #adds to the body the defined segment
         self.shape.mass = mass
         self.shape.friction = 0.9
-        self.shapes.append(self.shape)                               #adds to defined segment to the list of shapes.
+        #self.shapes.append(self.shape)                               #adds to defined segment to the list of shapes.
         physicsObjects.append(self.shape)
       
 
     def draw_shape(self, screen):
-        "Draws the (rotated) segments at the location of the physics body"
+        """Draws the (rotated) segments at the location of the physics body
+        The body keeps a reference to the shapes in a dictionary, this can be used to draw."""
+        self.shapes = list(self.body.shapes)
         for segment in self.shapes:
             p1 = self.body.position + segment.a.rotated(self.body.angle) #translate point to body pos and body angle 
             p2 = self.body.position + segment.b.rotated(self.body.angle) #translate point to body pos and body angle
@@ -105,6 +108,7 @@ class Circle(PhysicsBody):
         self.shape = pymunk.Circle(self.body,radius)
         self.shape.mass = mass
         physicsObjects.append(self.shape)
+        
     def draw_shape(self,screen): 
         "Draws the circle at the body with the set radius"
         centerx,centery = to_pygame(self.body.position)
