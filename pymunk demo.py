@@ -89,15 +89,22 @@ add_objects(space)
 print(Object_list)
 
 
-
 #%% Game loop
 def main():
+    selected_object = None  
     var=True
     running = True
     score = 0
 
     while running:
+        mouse_pos = pygame.mouse.get_pos()
+        query_info = space.point_query(mouse_pos,0,shape_filter=pymunk.ShapeFilter(group=0b001, mask= 0b001))
+        #print(query_info)
 
+        #%%
+      
+
+        #%%
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -131,6 +138,18 @@ def main():
         screen.fill((255,255,255))
         screen.blit(wheel,center)
         draw_to_screen(screen)
+
+        if query_info != []:
+            shape_id = id(query_info[0][0])
+            for obj in Object_list:
+                shape_list = list(obj.body.shapes)
+                obj_id = id(shape_list[0])
+                if obj_id == shape_id:
+                    obj.draw_shape(screen,(255,0,0))
+                    print(type(obj))
+
+
+        
         #draw_body_screen(screen)
 
         #updating the entire game

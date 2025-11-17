@@ -27,7 +27,6 @@ def translate_all(dxy):
     for obj in Object_list:    
         obj.translate_body(dxy)
 
-
 def to_pygame(p):
     """Small helper to convert Pymunk vec2d to Pygame integers"""
     return round(p.x), round(p.y)
@@ -61,7 +60,7 @@ class PhysicsBody:
 
     def draw_image(self,screen):
         pass 
-        
+
 #%%child objects inherit from PhysicsBody
 class Segment(PhysicsBody):
 
@@ -99,7 +98,7 @@ class Segment(PhysicsBody):
         physicsObjects.append(self.shape)                             #Shape needs to be added to the physics list to calculate moment of inertia and cog
       
 
-    def draw_shape(self, screen):
+    def draw_shape(self, screen, color = (0,0,0)):
         """Draws the (rotated) segments at the location of the physics body
         The body keeps a reference to the shapes in a dictionary, this can be used to draw."""
         self.shapes = list(self.body.shapes)
@@ -108,7 +107,7 @@ class Segment(PhysicsBody):
             p2 = self.body.position + segment.b.rotated(self.body.angle) #translate point to body pos and body angle
             p1 = to_pygame(p1)
             p2 = to_pygame(p2)
-            pygame.draw.lines(screen, (0,0,0), False, [p1,p2],self.radius)
+            pygame.draw.lines(screen, color, False, [p1,p2],self.radius)
 
 
 #%%child objects inherit from PhysicsBody
@@ -121,10 +120,10 @@ class Circle(PhysicsBody):
         self.shape.mass = mass
         physicsObjects.append(self.shape)
         
-    def draw_shape(self,screen): 
+    def draw_shape(self,screen, color = (0,0,0)): 
         "Draws the circle at the body with the set radius"
         centerx,centery = to_pygame(self.body.position)
-        pygame.draw.circle(screen, (0,0,0),(centerx,centery),self.radius)
+        pygame.draw.circle(screen, color,(centerx,centery),self.radius)
 
     def draw_image(self,screen):
         """rotates the original image by the body angle,  then draws it at body location"""
@@ -153,7 +152,6 @@ class camera:
         self.next = self.attached_to.body.position + self.attached_to.body.velocity * dt
         self.dxy = self.current - self.next
         translate_all(self.dxy)
-
 
     def get_dxy(self):
         """This function will calculate the delta x and delta y position of the attached
