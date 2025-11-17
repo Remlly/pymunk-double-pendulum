@@ -62,7 +62,7 @@ class rocker():
         self.SegmentSize = 100 * self.segmentScale
         self.wheelfriction = 0.3
         self.motor_rate = 0
-
+        
         #creating the structure
         self.structure = Segment(xy,self.SegmentSize,0,10,10) #the rocker should be created at bogie shapes[0].b (middle of the triangle)
         self.structure.add_segment(self.SegmentSize/2,90,10,10,(self.SegmentSize,0))
@@ -77,6 +77,7 @@ class rocker():
         self.wheel = Circle(self.wheelPoint,10,self.wheelSize)
         self.wheel_joint = pymunk.PinJoint(self.structure.body,self.wheel.body,shape_list[1].b,(0,0))
         self.wheel1_motor = pymunk.SimpleMotor(self.wheel.body,self.structure.body,self.motor_rate)
+        
         #appending joints
         physicsObjects.append(self.wheel_joint)
         physicsObjects.append(self.wheel1_motor)

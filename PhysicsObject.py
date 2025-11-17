@@ -18,9 +18,15 @@ def draw_to_screen(screen):
     for Obj in Object_list:
         Obj.draw_shape(screen)
         Obj.draw_image(screen)
+
 def draw_body_screen(screen):
     for Obj in Object_list:
         Obj.draw_body(screen)
+
+def translate_all(dxy):
+    for obj in Object_list:    
+        obj.translate_body(dxy)
+
 
 def to_pygame(p):
     """Small helper to convert Pymunk vec2d to Pygame integers"""
@@ -88,7 +94,7 @@ class Segment(PhysicsBody):
         self.radius = radius
         self.shape = pymunk.Segment(self.body, p1, p2, self.radius)  #adds to the body the defined segment
         self.shape.mass = mass
-        self.shape.friction = 0.3
+        self.shape.friction = 0.9
         #self.shapes.append(self.shape)                               #adds to defined segment to the list of shapes.
         physicsObjects.append(self.shape)                             #Shape needs to be added to the physics list to calculate moment of inertia and cog
       
@@ -125,6 +131,34 @@ class Circle(PhysicsBody):
         rotated_image = pygame.transform.rotate(self.image,-self.body.angle)
         blit_at = self.body.position - (rotated_image.get_width()/2, rotated_image.get_height()/2)
         screen.blit(rotated_image,blit_at)
+
+class camera:
+    def __init__(self, object, offset = (0,0)):
+        """A camera is bound to an object, it can have an offset from that body but will
+        always follow it. A static pymunk body is a valid object"""
+
+        
+        object.body.position += offset        
+
+        self.attached_to = object
+        self.current = self.attached_to.body.position
+        self.previous = self.current
+        self.offset = offset    
+
+
+    def update(self,dt):
+        """This will update the camera using a simple integration to get the next position """
+
+        self.current = self.attached_to.body.position
+        self.next = self.attached_to.body.position + self.attached_to.body.velocity * dt
+        self.dxy = self.current - self.next
+        translate_all(self.dxy)
+
+
+    def get_dxy(self):
+        """This function will calculate the delta x and delta y position of the attached
+        body and return it."""
+        return self.previous - self.attached_to.body.position
 
 #This code is only used for the pendulum. new joints can be made straight from pymunk. but
 #have to appended to the body list manually.

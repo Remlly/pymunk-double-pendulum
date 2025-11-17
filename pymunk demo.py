@@ -48,6 +48,8 @@ wheel = pygame.image.load('wheel.png.png').convert_alpha()
 clock = pygame.time.Clock()
 space = pymunk.Space()     # Create a Space which contain the simulation
 space.gravity = 0   ,373      # Set its gravity
+space.damping = 0.90
+1
 fps = 50
 
 floor = Segment((0,500),screenx,0,10,10,pymunk.Body.KINEMATIC) #kinematic objects can have collision but wont move by collision
@@ -80,6 +82,8 @@ def create_new_floor(floor):
 #%%Adding the physics object list to the physics space
 #magic function :spooky: This function adds all segment bodies and shapes to the physics space. I have abstracted it.
 
+camera1 = camera(rvr.bogie.structure,(100,50))
+
 create_new_floor(floor_list[0])
 add_objects(space) 
 print(Object_list)
@@ -89,12 +93,11 @@ print(Object_list)
 #%% Game loop
 def main():
     var=True
-    cam = True
     running = True
     score = 0
-    change_rate = pymunk.Vec2d(0,0)
+
     while running:
-        TranslateVector = pymunk.Vec2d(0,0)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -112,16 +115,13 @@ def main():
                 if event.key == pygame.K_s:
                     TranslateVector = (0,100)
         rvr.update()
-        if cam == True:
-            TranslateVector = pymunk.Vec2d(-change_rate[0],-change_rate[1])
 
-        for obj in Object_list:    
-            obj.translate_body(TranslateVector)
+
+        camera1.update(1/fps)
                     
 
         #als floor[1].body gets past 2/3 of screenx, create a new floor
         #if floor[0].body.local_to_world(shape.b) gets -10 its off the screen, delete it.
-
         if floor_list[-1].body.position[0] < (screenx * 0.66) and var:
             create_new_floor(floor_list[-1])
             score += 1
@@ -131,19 +131,14 @@ def main():
         screen.fill((255,255,255))
         screen.blit(wheel,center)
         draw_to_screen(screen)
-        
         #draw_body_screen(screen)
+
+        #updating the entire game
         pygame.display.update()
         clock.tick(fps)
-
-        #a basic camera mimick mingled with the step functions
-        current_pos = rvr.bogie.structure.body.position
         space.step(1/fps)
-        next_pos = rvr.bogie.structure.body.position
-        change_rate = next_pos - current_pos
-
-        #print(change_rate)
-
+        
+  
 if __name__ == "__main__":
     main()
 
