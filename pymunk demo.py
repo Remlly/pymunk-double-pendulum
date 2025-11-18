@@ -49,25 +49,15 @@ clock = pygame.time.Clock()
 space = pymunk.Space()     # Create a Space which contain the simulation
 space.gravity = 0   ,373      # Set its gravity
 space.damping = 0.90
-1
+
 fps = 50
 
 floor = Segment((0,500),screenx,0,10,10,pymunk.Body.KINEMATIC) #kinematic objects can have collision but wont move by collision
-#test = Segment((500,490),100,-15,10,7,pymunk.Body.KINEMATIC)
-#floor.shapes[0].friction = 0.9
-#test.shapes[0].friction = 0.9
+
 rvr = rocker_bogie()
 rvr.bogie.wheel1.attach_image('wheel.png.png')
 rvr.bogie.wheel2.attach_image('wheel.png.png')
 rvr.rocker.wheel.attach_image('wheel.png.png')
-
-#%%all objects that need to be drawn
-#DrawedObjects.append(floor)
-#DrawedObjects.append(test)
-
-len = rand.randint(20,120)
-angle = rand.randint(-15,25)
-
 
 floor_list = [floor]
 
@@ -82,12 +72,15 @@ def create_new_floor(floor):
 #%%Adding the physics object list to the physics space
 #magic function :spooky: This function adds all segment bodies and shapes to the physics space. I have abstracted it.
 
-camera1 = camera(rvr.bogie.structure,(100,50))
+
 
 create_new_floor(floor_list[0])
-add_objects(space) 
+#add_objects(space) 
 print(Object_list)
 
+Pmanager = PhysicsManager(screen,FLAG_DRAW_SURFACES=True,FLAG_DRAW_SHAPES=True)
+Pmanager.add_objects(space)
+camera1 = camera(Pmanager,rvr.bogie.structure,(100,0))
 
 #%% Game loop
 def main():
@@ -133,11 +126,7 @@ def main():
             create_new_floor(floor_list[-1])
             score += 1
             print(f'Segments generated(score):{score}' )
-            add_objects(space) 
-
-        screen.fill((255,255,255))
-        screen.blit(wheel,center)
-        draw_to_screen(screen)
+            Pmanager.add_objects(space)
 
         if query_info != []:
             shape_id = id(query_info[0][0])
@@ -148,9 +137,10 @@ def main():
                     obj.draw_shape(screen,(255,0,0))
                     print(type(obj))
 
+        screen.fill((255,255,255))
+        Pmanager.draw()
 
-        
-        #draw_body_screen(screen)
+     
 
         #updating the entire game
         pygame.display.update()

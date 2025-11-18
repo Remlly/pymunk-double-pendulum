@@ -5,31 +5,59 @@ physicsObjects = []
 Object_list = []
 
 
-def add_objects(space):
-    "When a shape and object are made, a global list is appended"
-    "this function will add that list to the physics world"
-    for Obj in physicsObjects:
-        space.add(Obj)
-
-    physicsObjects.clear()
-
-def draw_to_screen(screen):
-    "Only PhysicsObject classes should be in DrawedObjects. This function will then draw them to the screen"
-    for Obj in Object_list:
-        Obj.draw_shape(screen)
-        Obj.draw_image(screen)
-
-def draw_body_screen(screen):
-    for Obj in Object_list:
-        Obj.draw_body(screen)
-
-def translate_all(dxy):
-    for obj in Object_list:    
-        obj.translate_body(dxy)
-
 def to_pygame(p):
     """Small helper to convert Pymunk vec2d to Pygame integers"""
     return round(p.x), round(p.y)
+
+
+class PhysicsManager():
+    def __init__(self, screen: pygame.display, FLAG_DRAW_BODIES = False, FLAG_DRAW_SHAPES = False, FLAG_DRAW_SURFACES = False):
+        """Instead of a bunch of functions, An objecthandler will handle the moving
+        drawing and addition of objects"""
+        self.FLAG_DRAW_BODIES = FLAG_DRAW_BODIES
+        self.FLAG_DRAW_SHAPES = FLAG_DRAW_SHAPES
+        self.FLAG_DRAW_SURFACES = FLAG_DRAW_SURFACES
+        self.screen = screen
+        
+    def __draw_bodies(self):
+        """This function will draw the location of physics bodies"""
+        for Obj in Object_list:
+            Obj.draw_body(self.screen)
+    def __draw_shapes(self):
+        """This function will draw the physics shapes attached to physics bodies"""
+        for Obj in Object_list:
+            Obj.draw_shape(self.screen)
+
+    def __draw_surfaces(self):
+        """This function will draw the pygame surfaces attached to the shapes"""
+        for Obj in Object_list:
+            Obj.draw_image(self.screen)
+
+    def add_objects(self,space):
+        """This method will add all objects to the given physics space and clear the queue"""
+        
+        if physicsObjects != []: #if list is not empty
+            for Obj in physicsObjects:
+                space.add(Obj)
+            physicsObjects.clear()
+
+    def Translate(self,dxy):
+        """This will translate all bodies with xy"""
+        for obj in Object_list:    
+            obj.translate_body(dxy)
+
+    def draw(self):
+        """This method will draw objects according to the set flags. Flags are 
+        FLAG_DRAW_BODIES
+        FLAG_DRAW_SHAPES
+        FLAG_DRAW_SURFACES"""
+
+        if self.FLAG_DRAW_SHAPES:
+            self.__draw_shapes()
+        if self.FLAG_DRAW_BODIES:
+            self.__draw_bodies()
+        if self.FLAG_DRAW_SURFACES:
+            self.__draw_surfaces()
 
 #%%
 class PhysicsBody:
@@ -132,26 +160,23 @@ class Circle(PhysicsBody):
         screen.blit(rotated_image,blit_at)
 
 class camera:
-    def __init__(self, object, offset = (0,0)):
+    def __init__(self, manager : PhysicsManager, object, offset = (0,0)):
         """A camera is bound to an object, it can have an offset from that body but will
         always follow it. A static pymunk body is a valid object"""
 
-        
+        self.manager = manager
         object.body.position += offset        
 
         self.attached_to = object
         self.current = self.attached_to.body.position
         self.previous = self.current
-        self.offset = offset    
-
 
     def update(self,dt):
         """This will update the camera using a simple integration to get the next position """
-
         self.current = self.attached_to.body.position
         self.next = self.attached_to.body.position + self.attached_to.body.velocity * dt
         self.dxy = self.current - self.next
-        translate_all(self.dxy)
+        self.manager.Translate(self.dxy)
 
     def get_dxy(self):
         """This function will calculate the delta x and delta y position of the attached
