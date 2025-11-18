@@ -10,7 +10,7 @@ class bogie():
         self.wheelSize = 15
         self.segmentScale = 1
         self.SegmentSize = 50 * self.segmentScale
-        self.wheelfriction = 0.3
+        self.wheelfriction = 0.5
         self.motor_rate = 0
 
         #Here we are creating the bogie structure.
@@ -60,7 +60,7 @@ class rocker():
         self.wheelSize = 15
         self.segmentScale = 1
         self.SegmentSize = 100 * self.segmentScale
-        self.wheelfriction = 0.3
+        self.wheelfriction = 0.5
         self.motor_rate = 0
         
         #creating the structure

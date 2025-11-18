@@ -63,22 +63,21 @@ floor_list = [floor]
 
 rand.seed()
 def create_new_floor(floor):
-    len = rand.randint(100,220)
+    len = rand.randint(96,288)
     angle = rand.randint(-15,15)
     new_floor = Segment(floor.body.local_to_world(floor.shape.b), len,angle,10,10, pymunk.Body.KINEMATIC)
     #Object_list.append(new_floor) 
     floor_list.append(new_floor)
-   
+    new_floor.attach_image('Bar.png.png')
 #%%Adding the physics object list to the physics space
 #magic function :spooky: This function adds all segment bodies and shapes to the physics space. I have abstracted it.
 
 
 
 create_new_floor(floor_list[0])
-#add_objects(space) 
 print(Object_list)
 
-Pmanager = PhysicsManager(screen,FLAG_DRAW_SURFACES=True,FLAG_DRAW_SHAPES=True)
+Pmanager = PhysicsManager(screen,FLAG_DRAW_SURFACES=True,FLAG_DRAW_SHAPES=True, FLAG_DRAW_BODIES=False)
 Pmanager.add_objects(space)
 camera1 = camera(Pmanager,rvr.bogie.structure,(100,0))
 
@@ -115,8 +114,6 @@ def main():
                 if event.key == pygame.K_s:
                     TranslateVector = (0,100)
         rvr.update()
-
-
         camera1.update(1/fps)
                     
 
@@ -139,8 +136,6 @@ def main():
 
         screen.fill((255,255,255))
         Pmanager.draw()
-
-     
 
         #updating the entire game
         pygame.display.update()

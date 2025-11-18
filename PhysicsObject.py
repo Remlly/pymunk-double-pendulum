@@ -1,5 +1,6 @@
 import pygame
 import pymunk
+import math
 
 physicsObjects = []
 Object_list = []
@@ -12,7 +13,7 @@ def to_pygame(p):
 
 class PhysicsManager():
     def __init__(self, screen: pygame.display, FLAG_DRAW_BODIES = False, FLAG_DRAW_SHAPES = False, FLAG_DRAW_SURFACES = False):
-        """Instead of a bunch of functions, An objecthandler will handle the moving
+        """Instead of a bunch of functions, An object handler will handle the moving
         drawing and addition of objects"""
         self.FLAG_DRAW_BODIES = FLAG_DRAW_BODIES
         self.FLAG_DRAW_SHAPES = FLAG_DRAW_SHAPES
@@ -20,16 +21,16 @@ class PhysicsManager():
         self.screen = screen
         
     def __draw_bodies(self):
-        """This function will draw the location of physics bodies"""
+        """This method will draw the location of physics bodies"""
         for Obj in Object_list:
             Obj.draw_body(self.screen)
     def __draw_shapes(self):
-        """This function will draw the physics shapes attached to physics bodies"""
+        """This method will draw the physics shapes attached to physics bodies"""
         for Obj in Object_list:
             Obj.draw_shape(self.screen)
 
     def __draw_surfaces(self):
-        """This function will draw the pygame surfaces attached to the shapes"""
+        """This method will draw the pygame surfaces attached to the shapes"""
         for Obj in Object_list:
             Obj.draw_image(self.screen)
 
@@ -68,6 +69,7 @@ class PhysicsBody:
         self.body = pymunk.Body(body_type=body_type)
         self.body.position = xy
         self.shape = None
+        self.image = None
         self.radius = radius
         physicsObjects.append(self.body)
         Object_list.append(self)
@@ -105,7 +107,8 @@ class Segment(PhysicsBody):
         super().__init__(xy,radius,body_type)
         #self.shapes = []
         self.add_segment(l,angle,mass,radius)
-        
+        self.set_angle = angle
+        self.set_length = l
     def add_segment(self, l : int, angle : int, mass : int, radius, local = (0,0)):
         """creates a segment of any rotation defined of the
         positive x axis, this function will allow the addition of extra segments at local
@@ -124,7 +127,18 @@ class Segment(PhysicsBody):
         self.shape.friction = 0.9
         #self.shapes.append(self.shape)                               #adds to defined segment to the list of shapes.
         physicsObjects.append(self.shape)                             #Shape needs to be added to the physics list to calculate moment of inertia and cog
-      
+    
+    def draw_image(self, screen):
+        if self.image != None:
+            #scale image to radius
+            scaling_factor = (1,self.radius/(self.image.get_height()/2))
+            scaled = pygame.transform.scale_by(self.image,scaling_factor)
+
+            #rotate image
+            rotated_image = pygame.transform.rotate(scaled,-self.set_angle)
+            for i in range(0,self.set_length,32):
+                blit_at = self.body.position + pymunk.Vec2d(i,0).rotated_degrees(self.set_angle) + pymunk.Vec2d(0,-rotated_image.get_height()/2)
+                screen.blit(rotated_image,blit_at)
 
     def draw_shape(self, screen, color = (0,0,0)):
         """Draws the (rotated) segments at the location of the physics body
