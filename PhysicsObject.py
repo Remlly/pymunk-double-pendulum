@@ -76,6 +76,9 @@ class PhysicsBody:
 
     def draw_image(self,screen):
         pass 
+    
+    def get_cog(self):
+        return self.body.local_to_world(self.body.center_of_gravity)
 
 #%%child objects inherit from PhysicsBody
 class Segment(PhysicsBody):
@@ -121,9 +124,9 @@ class Segment(PhysicsBody):
             scaled = pygame.transform.scale_by(self.image,scaling_factor)
 
             #rotate image
-            rotated_image = pygame.transform.rotate(scaled,-self.set_angle)
+            rotated_image = pygame.transform.rotate(scaled,math.degrees(-self.body.angle))
             for i in range(0,self.set_length,32):
-                blit_at = self.body.position + pymunk.Vec2d(i,0).rotated_degrees(self.set_angle) + pymunk.Vec2d(0,-rotated_image.get_height()/2)
+                blit_at = self.body.position + pymunk.Vec2d(i,0).rotated(self.body.angle) - (rotated_image.get_width()/2,rotated_image.get_height()/2)
                 screen.blit(rotated_image,blit_at)
 
     def draw_shape(self, screen, color = (0,0,0)):
@@ -136,6 +139,8 @@ class Segment(PhysicsBody):
             p1 = to_pygame(p1)
             p2 = to_pygame(p2)
             pygame.draw.lines(screen, color, False, [p1,p2],self.radius)
+
+   
 
 
 #%%child objects inherit from PhysicsBody
@@ -160,12 +165,12 @@ class Circle(PhysicsBody):
         screen.blit(rotated_image,blit_at)
 
 class camera:
-    def __init__(self, manager : PhysicsManager, object, offset = (0,0)):
+    def __init__(self, manager : PhysicsManager, object, xy = (0,0)):
         """A camera is bound to an object, it can have an offset from that body but will
         always follow it. A static pymunk body is a valid object"""
 
         self.manager = manager
-        self.assign_to(object,(400,400))  
+        self.assign_to(object,xy)  
 
         self.attached_to = object
         self.current = self.attached_to.body.position

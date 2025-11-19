@@ -24,80 +24,84 @@
 import pygame
 import pymunk
 from PhysicsObject import *
-from DoublePendulum import *
-from RockerBogie import *
+#from DoublePendulum import *
+#from RockerBogie import *
 import random as rand
 from Button import *
 
 #%%initialize
-# Initialize Pygame
 pygame.init()
-#screenwidth
-screenx,screeny = 800,600
-#screen center
+pygame.font.init()
+
+#%%Helper variables
+screenx,screeny = 800,600   #screen dimensions
 cx,cy = screenx/2,screeny/2 #screen center
 center = (cx,cy)
+
 
 #Set up the game window
 screen = pygame.display.set_mode((screenx, screeny))
 screen.fill((255,255,255))
 pygame.display.flip()
-pygame.display.set_caption("Hello Pygame")
+pygame.display.set_caption("Hello PyPendulum!")
 
-wheel = pygame.image.load('wheel.png.png').convert_alpha()
+wheel = 'wheel.png.png'
+bar = 'Bar.png.png'
 
-clock = pygame.time.Clock()
-space = pymunk.Space()     # Create a Space which contain the simulation
+
+clock = pygame.time.Clock()   # Pygame clock for FPS limiting
+space = pymunk.Space()        # The 'space' where pymunk simulates
 space.gravity = 0   ,373      # Set its gravity
-space.damping = 0.90
-
-fps = 50
-
-floor = Segment((0,500),screenx,0,10,10,pymunk.Body.KINEMATIC) #kinematic objects can have collision but wont move by collision
-
-rvr = rocker_bogie()
-rvr.bogie.wheel1.attach_image('wheel.png.png')
-rvr.bogie.wheel2.attach_image('wheel.png.png')
-rvr.rocker.wheel.attach_image('wheel.png.png')
-
-floor_list = [floor]
-
-rand.seed()
-def create_new_floor(floor):
-    len = rand.randint(96,288)
-    angle = rand.randint(-15,15)
-    new_floor = Segment(floor.body.local_to_world(floor.shape.b), len,angle,10,10, pymunk.Body.KINEMATIC)
-    #Object_list.append(new_floor) 
-    floor_list.append(new_floor)
-    new_floor.attach_image('Bar.png.png')
-#%%Adding the physics object list to the physics space
-#magic function :spooky: This function adds all segment bodies and shapes to the physics space. I have abstracted it.
+space.damping = 1             # Global dampening variable from 0 (full) to 1 (none)
+fps = 50                      # Max fps
 
 
 
-create_new_floor(floor_list[0])
-print(Object_list)
 
-Pmanager = PhysicsManager(screen,FLAG_DRAW_SURFACES=True,FLAG_DRAW_SHAPES=True, FLAG_DRAW_BODIES=False)
-Pmanager.add_objects(space)
-camera1 = camera(Pmanager,rvr.bogie.structure,(100,0))
-next_button = button(((cx +75),(cy + 220)),(100,50),(0,255,255),'Next body')
-prev_button = button(((cx -175),(cy + 220)),(100,50),(0,255,255),'Prev body')
-pygame.font.init()
+
 
 #%% Game loop
 def main():
-    selected_object = None  
-    var=True
     running = True
-    score = 0
+    Pmanager = PhysicsManager(screen,FLAG_DRAW_SURFACES=True,FLAG_DRAW_SHAPES=False, FLAG_DRAW_BODIES=False)
+    
+    #Creating the pendulum objects and joints
+    world_point = Circle(center,10,10,pymunk.Body.STATIC)
+    Segment1 = Segment(center,100,0,10,10)
+    Segment2 = Segment(Segment1.body.local_to_world(Segment1.shape.b),100,0,10,10)
+    j1 = pymunk.PinJoint(Segment1.body,world_point.body,Segment1.shape.a,(0,0))
+    j2 = pymunk.PinJoint(Segment1.body,Segment2.body,Segment1.shape.b,Segment2.shape.a)
+
+    world_point.attach_image(wheel)
+    Segment1.attach_image(bar)
+    Segment2.attach_image(bar)
+
+    physicsObjects.append(j1)
+    physicsObjects.append(j2)
+
+    segment_group = 0b100   #segments are group 1 (ob1)
+    segment_mask = 0b000    #Segments dont collide with group 1 (ob0) 
+    Segment1.shape.filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
+    Segment2.shape.filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
+    world_point.shape.filter = pymunk.ShapeFilter(group=segment_group, mask = segment_mask)
+
+
+    next_button = button(((cx +75),(cy + 220)),(100,50),(0,255,255),'Next body')
+    prev_button = button(((cx -175),(cy + 220)),(100,50),(0,255,255),'Prev body')
+
+    camera1 = camera(Pmanager,world_point,center)
+
+    selector_i = 0
+    selector_min = 0
+    selector_max = len(Object_list)-1
 
     while running:
         #Get mouse information 
-        mouse_pos = pygame.mouse.get_pos()
+        mouse_pos = pygame.mouse.get_pos() #Get mouse position
+        Pmanager.add_objects(space)        #Add objects if any are in queue
         
 
-        #%%
+        
        
         #%%
         for event in pygame.event.get():
@@ -110,15 +114,22 @@ def main():
             #if the key is down.
             if event.type == pygame.MOUSEBUTTONDOWN:
                 left, middle, right = pygame.mouse.get_pressed()
+                print(selector_i)
                 if left & next_button.update(mouse_pos):
-                    camera1.assign_to(rvr.rocker.wheel,center)
+                    selector_i = selector_i +1
+                    
+                    if selector_i > selector_max:
+                        selector_i = selector_min
+                    camera1.assign_to(Object_list[selector_i],center)
                 if left & prev_button.update(mouse_pos):
-                    camera1.assign_to(rvr.bogie.structure,center)
-                    print('bye')
+                    selector_i = selector_i - 1
+                    if selector_i < selector_min:
+                        selector_i = selector_max
+                    camera1.assign_to(Object_list[selector_i],center)
 
 
             if event.type == pygame.KEYDOWN:
-                rvr.get_input(event)
+                #rvr.get_input(event)
                 print('A key has been pressed')
 
                 if event.key == pygame.K_a:
@@ -129,26 +140,10 @@ def main():
                     TranslateVector = (0,-100)
                 if event.key == pygame.K_s:
                     TranslateVector = (0,100)
-        rvr.update()
+
         camera1.update(1/fps)
                     
 
-        #als floor[1].body gets past 2/3 of screenx, create a new floor
-        #if floor[0].body.local_to_world(shape.b) gets -10 its off the screen, delete it.
-        if floor_list[-1].body.position[0] < (screenx * 0.66) and var:
-            create_new_floor(floor_list[-1])
-            score += 1
-            print(f'Segments generated(score):{score}' )
-            Pmanager.add_objects(space)
-
-        # if query_info != []:
-        #     shape_id = id(query_info[0][0])
-        #     for obj in Object_list:
-        #         shape_list = list(obj.body.shapes)
-        #         obj_id = id(shape_list[0])
-        #         if obj_id == shape_id:
-        #             obj.draw_shape(screen,(255,0,0))
-        #             print(type(obj))
 
         screen.fill((255,255,255))
         Pmanager.draw()

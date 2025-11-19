@@ -3,6 +3,24 @@
 from PhysicsObject import *
 
 
+
+#rvr = rocker_bogie()
+#rvr.bogie.wheel1.attach_image('wheel.png.png')
+#rvr.bogie.wheel2.attach_image('wheel.png.png')
+#rvr.rocker.wheel.attach_image('wheel.png.png')
+
+
+floor_list = [floor]
+
+rand.seed()
+def create_new_floor(floor):
+    len = rand.randint(96,288)
+    angle = rand.randint(-15,15)
+    new_floor = Segment(floor.body.local_to_world(floor.shape.b), len,angle,10,10, pymunk.Body.KINEMATIC)
+    #Object_list.append(new_floor) 
+    floor_list.append(new_floor)
+    new_floor.attach_image('Bar.png.png')
+
 #%%Welcome to nesting hell. 
 class bogie():
     def __init__(self):
