@@ -51,7 +51,7 @@ bar = 'Bar.png.png'
 
 clock = pygame.time.Clock()   # Pygame clock for FPS limiting
 space = pymunk.Space()        # The 'space' where pymunk simulates
-space.gravity = 0   ,373      # Set its gravity
+space.gravity = 0   ,373      # Set gravity
 space.damping = 1             # Global dampening variable from 0 (full) to 1 (none)
 fps = 50                      # Max fps
 
@@ -101,8 +101,6 @@ def main():
         Pmanager.add_objects(space)        #Add objects if any are in queue
         
 
-        
-       
         #%%
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -115,36 +113,21 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 left, middle, right = pygame.mouse.get_pressed()
                 print(selector_i)
+                #check if next button is pressed
                 if left & next_button.update(mouse_pos):
                     selector_i = selector_i +1
-                    
-                    if selector_i > selector_max:
-                        selector_i = selector_min
+                    if selector_i > selector_max: #out of bounds check
+                        selector_i = selector_min   #wrap around 
                     camera1.assign_to(Object_list[selector_i],center)
+                #check if previous button is pressed
                 if left & prev_button.update(mouse_pos):
                     selector_i = selector_i - 1
-                    if selector_i < selector_min:
-                        selector_i = selector_max
+                    if selector_i < selector_min: #out of bounds check
+                        selector_i = selector_max   #wrap around
                     camera1.assign_to(Object_list[selector_i],center)
 
 
-            if event.type == pygame.KEYDOWN:
-                #rvr.get_input(event)
-                print('A key has been pressed')
-
-                if event.key == pygame.K_a:
-                    TranslateVector = (-10,0)
-                if event.key == pygame.K_d:
-                    TranslateVector = (10,0)
-                if event.key == pygame.K_w:
-                    TranslateVector = (0,-100)
-                if event.key == pygame.K_s:
-                    TranslateVector = (0,100)
-
         camera1.update(1/fps)
-                    
-
-
         screen.fill((255,255,255))
         Pmanager.draw()
         next_button.draw(screen)
