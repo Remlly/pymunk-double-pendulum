@@ -20,20 +20,6 @@ class PhysicsManager():
         self.FLAG_DRAW_SURFACES = FLAG_DRAW_SURFACES
         self.screen = screen
         
-    def __draw_bodies(self):
-        """This method will draw the location of physics bodies"""
-        for Obj in Object_list:
-            Obj.draw_body(self.screen)
-    def __draw_shapes(self):
-        """This method will draw the physics shapes attached to physics bodies"""
-        for Obj in Object_list:
-            Obj.draw_shape(self.screen)
-
-    def __draw_surfaces(self):
-        """This method will draw the pygame surfaces attached to the shapes"""
-        for Obj in Object_list:
-            Obj.draw_image(self.screen)
-
     def add_objects(self,space):
         """This method will add all objects to the given physics space and clear the queue"""
         
@@ -52,13 +38,13 @@ class PhysicsManager():
         FLAG_DRAW_BODIES
         FLAG_DRAW_SHAPES
         FLAG_DRAW_SURFACES"""
-
-        if self.FLAG_DRAW_SHAPES:
-            self.__draw_shapes()
-        if self.FLAG_DRAW_BODIES:
-            self.__draw_bodies()
-        if self.FLAG_DRAW_SURFACES:
-            self.__draw_surfaces()
+        for Obj in Object_list:
+            if self.FLAG_DRAW_SHAPES:
+                Obj.draw_shape(self.screen)
+            if self.FLAG_DRAW_BODIES:
+                Obj.draw_body(self.screen)
+            if self.FLAG_DRAW_SURFACES:
+                Obj.draw_image(self.screen)
 
 #%%
 class PhysicsBody:
