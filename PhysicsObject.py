@@ -165,7 +165,7 @@ class camera:
         always follow it. A static pymunk body is a valid object"""
 
         self.manager = manager
-        object.body.position += offset        
+        self.assign_to(object,(400,400))  
 
         self.attached_to = object
         self.current = self.attached_to.body.position
@@ -182,6 +182,15 @@ class camera:
         """This function will calculate the delta x and delta y position of the attached
         body and return it."""
         return self.previous - self.attached_to.body.position
+    
+    def assign_to(self, object : pymunk.body ,xy, offset = (0,0)):
+        """This method will assign the camera to a object, and move all objects such that
+        its in the middle of specified location"""
+        x,y = xy
+        Objx, Objy = object.body.position
+        dx,dy = x-Objx,y-Objy
+        self.attached_to = object
+        self.manager.Translate((dx,dy))
 
 #This code is only used for the pendulum. new joints can be made straight from pymunk. but
 #have to appended to the body list manually.
@@ -201,6 +210,7 @@ class Joint(PhysicsBody):
         physicsObjects.append(self.body)
         
     
+
     def draw_body(self):
         #we cant draw the body because joints dont keep track of their position
         #To make this work, we either have to draw on position A, or B, or an interpolated

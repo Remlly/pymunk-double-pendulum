@@ -27,6 +27,7 @@ from PhysicsObject import *
 from DoublePendulum import *
 from RockerBogie import *
 import random as rand
+from Button import *
 
 #%%initialize
 # Initialize Pygame
@@ -80,6 +81,9 @@ print(Object_list)
 Pmanager = PhysicsManager(screen,FLAG_DRAW_SURFACES=True,FLAG_DRAW_SHAPES=True, FLAG_DRAW_BODIES=False)
 Pmanager.add_objects(space)
 camera1 = camera(Pmanager,rvr.bogie.structure,(100,0))
+next_button = button(((cx +75),(cy + 220)),(100,50),(0,255,255),'Next body')
+prev_button = button(((cx -175),(cy + 220)),(100,50),(0,255,255),'Prev body')
+pygame.font.init()
 
 #%% Game loop
 def main():
@@ -89,22 +93,34 @@ def main():
     score = 0
 
     while running:
+        #Get mouse information 
         mouse_pos = pygame.mouse.get_pos()
-        query_info = space.point_query(mouse_pos,0,shape_filter=pymunk.ShapeFilter(group=0b001, mask= 0b001))
-        #print(query_info)
+        
 
         #%%
-      
-
+       
         #%%
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
                 # Quit Pygame
                 pygame.quit()
+
+            #Detecting for clicks on buttons. The button needs to be debounced by detecting
+            #if the key is down.
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                left, middle, right = pygame.mouse.get_pressed()
+                if left & next_button.update(mouse_pos):
+                    camera1.assign_to(rvr.rocker.wheel,center)
+                if left & prev_button.update(mouse_pos):
+                    camera1.assign_to(rvr.bogie.structure,center)
+                    print('bye')
+
+
             if event.type == pygame.KEYDOWN:
                 rvr.get_input(event)
                 print('A key has been pressed')
+
                 if event.key == pygame.K_a:
                     TranslateVector = (-10,0)
                 if event.key == pygame.K_d:
@@ -125,18 +141,19 @@ def main():
             print(f'Segments generated(score):{score}' )
             Pmanager.add_objects(space)
 
-        if query_info != []:
-            shape_id = id(query_info[0][0])
-            for obj in Object_list:
-                shape_list = list(obj.body.shapes)
-                obj_id = id(shape_list[0])
-                if obj_id == shape_id:
-                    obj.draw_shape(screen,(255,0,0))
-                    print(type(obj))
+        # if query_info != []:
+        #     shape_id = id(query_info[0][0])
+        #     for obj in Object_list:
+        #         shape_list = list(obj.body.shapes)
+        #         obj_id = id(shape_list[0])
+        #         if obj_id == shape_id:
+        #             obj.draw_shape(screen,(255,0,0))
+        #             print(type(obj))
 
         screen.fill((255,255,255))
         Pmanager.draw()
-
+        next_button.draw(screen)
+        prev_button.draw(screen)
         #updating the entire game
         pygame.display.update()
         clock.tick(fps)
