@@ -73,8 +73,7 @@ def main():
     prev_button = button(((cx -175),(cy + 220)),(100,50),(0,255,255),'Prev body')
 
     camera1 = camera(Pmanager,world_point,center)
-    camera_debouncer = 0
-
+ 
     selector_i = 0
     selector_min = 0
     selector_max = len(Object_list)-1
@@ -84,10 +83,8 @@ def main():
         #Get mouse information 
         mouse_pos = pygame.mouse.get_pos() #Get mouse position
         Pmanager.add_objects(space)        #Add objects if any are in queue
-        #print(f'method 1:{Segment1.body.position}, method2:{Segment1.body.local_to_world(Segment1.shape.a)},j1.d{j1.distance}')
-        #print(f'body_pos{Object_list[selector_i].body.position}, camera {camera1.dxy}')
+       
         #%%
-        camera_debouncer += 1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
