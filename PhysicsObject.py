@@ -134,13 +134,11 @@ class Segment(PhysicsBody):
         The body keeps a reference to the shapes in a dictionary, this can be used to draw."""
         self.shapes = list(self.body.shapes)
         for segment in self.shapes:
-            p1 = self.body.position + segment.a.rotated(self.body.angle) #translate point to body pos and body angle 
-            p2 = self.body.position + segment.b.rotated(self.body.angle) #translate point to body pos and body angle
+            p1 = self.body.local_to_world(segment.a) 
+            p2 = self.body.local_to_world(segment.b) 
             p1 = to_pygame(p1)
             p2 = to_pygame(p2)
             pygame.draw.lines(screen, color, False, [p1,p2],self.radius)
-
-   
 
 
 #%%child objects inherit from PhysicsBody
@@ -154,9 +152,10 @@ class Circle(PhysicsBody):
         physicsObjects.append(self.shape)
         
     def draw_shape(self,screen, color = (0,0,0)): 
+        pass
         "Draws the circle at the body with the set radius"
-        centerx,centery = to_pygame(self.body.position)
-        pygame.draw.circle(screen, color,(centerx,centery),self.radius)
+        #centerx,centery = to_pygame(self.body.position)
+        #pygame.draw.circle(screen, color,(centerx,centery),self.radius)
 
     def draw_image(self,screen):
         """rotates the original image by the body angle,  then draws it at body location"""
@@ -171,18 +170,32 @@ class camera:
 
         self.manager = manager
         self.assign_to(object,xy)  
-
+        self.xy = xy
         self.attached_to = object
         self.current = self.attached_to.body.position
-        self.previous = self.current
+        self.dxy = 0
+        self.deadband = 0
+          
 
     def update(self,dt):
         """This will update the camera using a simple integration to get the next position """
         self.current = self.attached_to.body.position
         self.next = self.attached_to.body.position + self.attached_to.body.velocity * dt
-        self.dxy = self.current - self.next
+        self.dxy = self.next - self.current
         self.manager.Translate(self.dxy)
+        print(self.dxy)
 
+    def update(self, object : PhysicsBody):
+        """Updates camera based on previous location"""
+
+        self.current = object.get_cog()               #get a new current position
+        self.dxy = self.xy - self.current             #calculate the changed position to the set position
+
+        print(f'body_pos{self.current}, camera {self.dxy}')
+        #possible to pixelate or debounce the camera by setting self.deadband
+        if (self.dxy > pymunk.Vec2d(self.deadband,self.deadband) or self.dxy < pymunk.Vec2d(-self.deadband,-self.deadband)):
+            self.manager.Translate(self.dxy)
+        
     def get_dxy(self):
         """This function will calculate the delta x and delta y position of the attached
         body and return it."""
@@ -197,28 +210,4 @@ class camera:
         self.attached_to = object
         self.manager.Translate((dx,dy))
 
-#This code is only used for the pendulum. new joints can be made straight from pymunk. but
-#have to appended to the body list manually.
-class Joint(PhysicsBody):
-    def __init__(self, joint: pymunk.constraints, *args):
-        "By passing the type of constraint and the appropiate number of arguments, we can initiate any constraint within pymunk.constraints"
-        "We still have to check for joint type and unpack accordingly :("
-        if joint == pymunk.PinJoint:
-            #unpack the first 4 variables for a pinjoint. body_a, body_b shape.a, shape.b
-            body_a, body_b, shape_a, shape_b = args
-            self.body = joint (body_a.body,body_b.body,shape_a,shape_b)
-        elif joint == pymunk.SimpleMotor:
-            #we have to only unpack the first 3 variables for a pinjoint
-            body_a, body_b, speed = args
-            self.body = pymunk.SimpleMotor(body_a.body,body_b.body, speed)
-        
-        physicsObjects.append(self.body)
-        
-    
 
-    def draw_body(self):
-        #we cant draw the body because joints dont keep track of their position
-        #To make this work, we either have to draw on position A, or B, or an interpolated
-        #position 
-        pass
-# %%
