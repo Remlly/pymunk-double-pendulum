@@ -154,8 +154,8 @@ class Circle(PhysicsBody):
     def draw_shape(self,screen, color = (0,0,0)): 
         pass
         "Draws the circle at the body with the set radius"
-        #centerx,centery = to_pygame(self.body.position)
-        #pygame.draw.circle(screen, color,(centerx,centery),self.radius)
+        centerx,centery = to_pygame(self.body.position)
+        pygame.draw.circle(screen, color,(centerx,centery),self.radius)
 
     def draw_image(self,screen):
         """rotates the original image by the body angle,  then draws it at body location"""
