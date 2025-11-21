@@ -125,7 +125,7 @@ class Segment(PhysicsBody):
 
             #rotate image
             rotated_image = pygame.transform.rotate(scaled,math.degrees(-self.body.angle))
-            for i in range(0,self.set_length,32):
+            for i in range(16,self.set_length,32):
                 blit_at = self.body.position + pymunk.Vec2d(i,0).rotated(self.body.angle) - (rotated_image.get_width()/2,rotated_image.get_height()/2)
                 screen.blit(rotated_image,blit_at)
 

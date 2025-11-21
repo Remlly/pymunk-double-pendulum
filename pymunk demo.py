@@ -43,12 +43,12 @@ def main():
     
     #Creating the pendulum objects and joints
     world_point = Circle(center,10,10,pymunk.Body.STATIC)
-    Segment1 = Segment(center,100,0,10,10)
-    Segment2 = Segment(Segment1.body.local_to_world(Segment1.shape.b),100,0,10,10)
+    Segment1 = Segment(center,96,0,10,10)
+    Segment2 = Segment(Segment1.body.local_to_world(Segment1.shape.b),96,0,10,10)
     j1 = pymunk.PinJoint(Segment1.body,world_point.body,Segment1.shape.a,(0,0))
     j2 = pymunk.PinJoint(Segment1.body,Segment2.body,Segment1.shape.b,Segment2.shape.a)
 
-    world_floor = Segment((0,screeny),screenx,0,0,10,pymunk.Body.STATIC)
+    world_floor = Segment((0,screeny),screenx,0,0,10,pymunk.Body.KINEMATIC)
     world_floor.attach_image(bar)
     world_point.attach_image(wheel)
     Segment1.attach_image(bar)
