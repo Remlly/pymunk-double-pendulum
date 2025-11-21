@@ -28,11 +28,11 @@ class PhysicsManager():
                 space.add(Obj)
             physicsObjects.clear()
 
-    def Translate(self,dxy):
+    def Translate(self,dxy,space):
         """This will translate all bodies with xy"""
         for obj in Object_list:    
             obj.translate_body(dxy)
-
+            space.reindex_shapes_for_body(obj.body)
     def draw(self):
         """This method will draw objects according to the set flags. Flags are 
         FLAG_DRAW_BODIES
@@ -113,7 +113,7 @@ class Segment(PhysicsBody):
         self.radius = radius
         self.shape = pymunk.Segment(self.body, p1, p2, self.radius)  #adds to the body the defined segment
         self.shape.mass = mass
-        self.shape.friction = 0.9
+        self.shape.friction = 0.3
         #self.shapes.append(self.shape)                               #adds to defined segment to the list of shapes.
         physicsObjects.append(self.shape)                             #Shape needs to be added to the physics list to calculate moment of inertia and cog
     
@@ -138,7 +138,7 @@ class Segment(PhysicsBody):
             p2 = self.body.local_to_world(segment.b) 
             p1 = to_pygame(p1)
             p2 = to_pygame(p2)
-            pygame.draw.lines(screen, color, False, [p1,p2],self.radius)
+            pygame.draw.lines(screen, color, False, [p1,p2],self.radius*2)
 
 
 #%%child objects inherit from PhysicsBody
@@ -150,7 +150,10 @@ class Circle(PhysicsBody):
         self.shape = pymunk.Circle(self.body,radius)
         self.shape.mass = mass
         physicsObjects.append(self.shape)
-        
+        self.shape.friction = 0.4
+        self.shape.elasticity = 0.4
+
+
     def draw_shape(self,screen, color = (0,0,0)): 
         pass
         "Draws the circle at the body with the set radius"
@@ -158,10 +161,12 @@ class Circle(PhysicsBody):
         pygame.draw.circle(screen, color,(centerx,centery),self.radius)
 
     def draw_image(self,screen):
-        """rotates the original image by the body angle,  then draws it at body location"""
-        rotated_image = pygame.transform.rotate(self.image,-self.body.angle)
-        blit_at = self.body.position - (rotated_image.get_width()/2, rotated_image.get_height()/2)
-        screen.blit(rotated_image,blit_at)
+        """rotates the original image by the body angle,  then draws it at body
+        location"""
+        if self.image != None:
+            rotated_image = pygame.transform.rotate(self.image,-self.body.angle)
+            blit_at = self.body.position - (rotated_image.get_width()/2, rotated_image.get_height()/2)
+            screen.blit(rotated_image,blit_at)
 
 class camera:
     def __init__(self, manager : PhysicsManager, object, xy = (0,0)):
@@ -169,7 +174,7 @@ class camera:
         always follow it. A static pymunk body is a valid object"""
 
         self.manager = manager
-        self.assign_to(object,xy)  
+        #self.assign_to(object,xy)  
         self.xy = xy
         self.attached_to = object
         self.current = self.attached_to.body.position
@@ -185,17 +190,17 @@ class camera:
         self.manager.Translate(self.dxy)
         print(self.dxy)
 
-    def update(self, object : PhysicsBody):
+    def update(self, object : PhysicsBody, Space):
         """Updates camera based on previous location"""
 
         self.current = object.get_cog()               #get a new current position
         self.dxy = self.xy - self.current             #calculate the changed position to the set position
 
-        print(f'body_pos{self.current}, camera {self.dxy}')
+        #print(f'body_pos{self.current}, camera {self.dxy}')
         #possible to pixelate or debounce the camera by setting self.deadband
         if (self.dxy > pymunk.Vec2d(self.deadband,self.deadband) or self.dxy < pymunk.Vec2d(-self.deadband,-self.deadband)):
-            self.manager.Translate(self.dxy)
-        
+            self.manager.Translate(self.dxy,Space)
+            
     def get_dxy(self):
         """This function will calculate the delta x and delta y position of the attached
         body and return it."""
