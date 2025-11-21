@@ -57,11 +57,15 @@ def main():
     physicsObjects.append(j1)
     physicsObjects.append(j2)
 
-    segment_group = 0b1  #segments are group 1 (ob1)
-    segment_mask = 0b0    #Segments dont collide with group 1 (ob0) 
+    segment_group = 0b0001  #segments are group 1 (ob1)
+    segment_mask = 0b0010    #Segments dont collide with group 1 (ob0) 
+    world_point.shape.filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
     Segment1.shape.filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
     Segment2.shape.filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
     #world_point.shape.filter = pymunk.ShapeFilter(group=segment_group, mask = segment_mask)
+
+    ball_group = 0b0010
+    ball_mask = 0b0001
 
 
     next_button = button(((cx +75),(cy + 220)),(100,50),(0,255,255),'Next body')
@@ -94,11 +98,9 @@ def main():
                 #rint(Object_list[selector_i])
                 #check if next button is pressed
                 if right:
-                    ball = Circle(mouse_pos,10,10)
-                    
-                    selector_max = len(Object_list)-1
-                    #ball.attach_image(wheel)
-                    #ball.shape.filter = pymunk.ShapeFilter(group=0b0, mask= 0b111)
+                    Circle(mouse_pos,10,10)                 #we create a circle
+                    selector_max = len(Object_list)-1       #update the max iterator
+                  
                 
                 if left & next_button.update(mouse_pos):
                     selector_i = selector_i +1

@@ -113,7 +113,7 @@ class Segment(PhysicsBody):
         self.radius = radius
         self.shape = pymunk.Segment(self.body, p1, p2, self.radius)  #adds to the body the defined segment
         self.shape.mass = mass
-        self.shape.friction = 0.3
+        self.shape.friction = 0.9
         #self.shapes.append(self.shape)                               #adds to defined segment to the list of shapes.
         physicsObjects.append(self.shape)                             #Shape needs to be added to the physics list to calculate moment of inertia and cog
     
@@ -152,7 +152,7 @@ class Circle(PhysicsBody):
         physicsObjects.append(self.shape)
         self.shape.friction = 0.4
         self.shape.elasticity = 0.4
-
+        
 
     def draw_shape(self,screen, color = (0,0,0)): 
         pass
