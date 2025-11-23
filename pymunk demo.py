@@ -9,6 +9,7 @@ import pygame
 import pymunk
 from PhysicsObject import *
 from Button import *
+from debug_drawer import debugscreen
 
 #%%initialize
 pygame.init()
@@ -36,6 +37,11 @@ space.gravity = 0   ,373      # Set gravity
 space.damping = 1             # Global dampening variable from 0 (full) to 1 (none)
 fps = 50                      # Max fps
 
+debug_loc = (10*screenx/12, screeny/6)
+debug_size  = (2*screenx/12, 2*screeny/3)
+debug = debugscreen(debug_loc,debug_size)
+
+
 #%% Game loop
 def main():
     running = True
@@ -62,12 +68,7 @@ def main():
     world_point.shape.filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
     Segment1.shape.filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
     Segment2.shape.filter = pymunk.ShapeFilter(group=segment_group, mask= segment_mask)
-    #world_point.shape.filter = pymunk.ShapeFilter(group=segment_group, mask = segment_mask)
-
-    ball_group = 0b0010
-    ball_mask = 0b0001
-
-
+     
     next_button = button(((cx +75),(cy + 220)),(100,50),(0,255,255),'Next body')
     prev_button = button(((cx -175),(cy + 220)),(100,50),(0,255,255),'Prev body')
 
@@ -83,7 +84,11 @@ def main():
         #Get mouse information 
         mouse_pos = pygame.mouse.get_pos() #Get mouse position
         Pmanager.add_objects(space)        #Add objects if any are in queue
-       
+        debug.set_text('fps',clock.get_fps())
+        debug.set_text('mouse pos', mouse_pos)
+        debug.set_text('selector', selector_i)
+        debug.set_text('objects', len(Object_list))
+
         #%%
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -113,11 +118,19 @@ def main():
                     if selector_i < selector_min: #out of bounds check
                         selector_i = selector_max   #wrap around
                     #camera1.assign_to(Object_list[selector_i],center)
-
+            if event.type == pygame.KEYDOWN:
+                print('test')
+                if event.key == pygame.K_F1:
+                    if debug.DRAW_FLAG == False:
+                        debug.DRAW_FLAG = True
+                    else:
+                        debug.DRAW_FLAG = False
 
         
         screen.fill((255,255,255))
+        
         Pmanager.draw()
+        debug.draw(screen)
         next_button.draw(screen)
         prev_button.draw(screen)
         #updating the entire game
